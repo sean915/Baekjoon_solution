@@ -1,70 +1,107 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
-vector<vector<int>> vGraph;
-bool *flag;
-
-void dfs(int Indx);
+void DFS(int x,int y,vector<pair<int,int>> vMap);
+vector<vector<bool>> flag;
+int Rows,Cols;
+int cnt = 0;
 
 int main(){
 
   ios::sync_with_stdio(false);
   cin.tie(NULL);
   cout.tie(NULL);
-  
-  int n,m,node,node2;
-  int cnt = 0;
-  // node번호를 배열 인덱스로 치환 ( -1)
-  int indx,indx2;
-  vector<int> v;
 
-  // input
-  cin >> n >> m; 
-  flag = new bool[n];
-  
-  for(int i=0;i<n;i++) 
-  {
-    vGraph.push_back(v);
-    flag[i] = false;
-  }
-  
-  for(int i=0; i<m; i++)
-  { // node값 입력, 배열 indx로 연결관계 치환
-    cin >> node >> node2;
-    indx = node -1; indx2 = node2 -1;
-    // 무방향 그래프
-    vGraph[indx].push_back(indx2);
-    vGraph[indx2].push_back(indx);
-  }
+  vector<int> result;
+  int testCnt;
+  int K;
+  int row,col;
+  cin >> testCnt;
 
-  // 연결 요소 카운트
-  for(int i=0;i<n;i++) 
+  pair<int,int> p;
+
+  for(int i=0;i<testCnt;i++)
   {
-    if(flag[i] == false)
+    vector<pair<int,int>> vMap;
+    // 가로,세로,연결된 배추 수 
+    cin >> Cols >> Rows >> K;
+        
+    for (int i = 0; i < Rows; i++)
     {
-      cnt++;
-      dfs(i);
+      vector<bool> element(Cols);
+      flag.push_back(element);
+    }    
+    
+    for(int i=0;i<Rows;i++)
+      for(int j=0;j<Cols;j++) 
+        flag[i][j] = 0;
+  
+    for(int i=0;i<K;i++)
+    {
+      // 배추의 x = col,y = row좌표
+      cin >> col >> row;
+      p.first = col; p.second = row;
+      vMap.push_back(p);
     }
+
+    for(int i=0;i<K;i++)
+    {
+      col = vMap[i].first;
+      row = vMap[i].second;
+      //cout << col << row << '\n';
+      if(!flag[row][col]) 
+      {
+        cnt++;
+        DFS(row,col,vMap);
+      } 
+    }
+    result.push_back(cnt);
+    
+    for (int i = 0; i < Cols; i++)
+    {
+        flag[i].clear();
+    }
+    flag.clear();
+    cnt = 0;
   }
-  cout << cnt;
+
+  for(int i=0;i<result.size();i++)
+    cout << result[i] << '\n';
+
+  return 0;
 }
 
-
-void dfs(int Indx)
+void DFS(int row,int col,vector<pair<int,int>> vMap)
 {
-  if(flag[Indx] == false)
+  if(!flag[row][col])
   {
-    flag[Indx] = true;
-    int nextIndx;
-    if(vGraph[Indx].size() > 0)
+    flag[row][col] = true;
+    if(row+1<Rows) 
     {
-      for(int i=0;i<vGraph[Indx].size();i++)
-      {
-        nextIndx = vGraph[Indx][i];
-        dfs(nextIndx);
-      }
+      pair<int,int> p = make_pair(col,row+1);
+      if(find(vMap.begin(),vMap.end(),p)!= vMap.end())
+         DFS(row+1,col,vMap);
+    }
+    if(col+1<Cols) 
+    {
+      pair<int,int> p = make_pair(col+1,row);
+      if(find(vMap.begin(),vMap.end(),p)!= vMap.end())
+         DFS(row,col+1,vMap);
+    }
+    if(row-1>=0) 
+    {
+      pair<int,int> p = make_pair(col,row-1);
+      if(find(vMap.begin(),vMap.end(),p)!= vMap.end())
+        DFS(row-1,col,vMap);
+    }
+    if(col-1>=0) 
+    {
+      pair<int,int> p = make_pair(col-1,row);
+      if(find(vMap.begin(),vMap.end(),p)!= vMap.end())
+        DFS(row,col-1,vMap);
     }
   }
 }
